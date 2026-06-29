@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智慧停車助手 - 隨機尋車升級版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .phone-mockup { max-width: 412px; min-height: 840px; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center py-8 px-4 font-sans">
+
+    <div class="phone-mockup w-full bg-slate-50 rounded-[40px] shadow-2xl border-[12px] border-slate-800 overflow-hidden flex flex-col justify-between">
+        
+        <header class="bg-white shadow-sm px-5 py-4 flex justify-between items-center border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-square-p text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-black text-slate-800 text-base tracking-wide block">AI 智慧停車助手</span>
+                    <span class="text-[10px] text-blue-600 font-semibold uppercase tracking-wider block">多元支付展示版</span>
+                </div>
+            </div>
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+        </header>
+
+        <div class="bg-white border-b border-slate-200 flex text-center text-sm font-bold text-slate-500">
+            <button id="tabFind" onclick="switchTab('find')" class="flex-1 py-3 text-blue-600 border-b-2 border-blue-600 transition-all flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-map-location-dot"></i> <span>出發找車位</span>
+            </button>
+            <button id="tabPay" onclick="switchTab('pay')" class="flex-1 py-3 hover:text-slate-800 transition-all flex items-center justify-center space-x-1 text-slate-500">
+                <i class="fa-solid fa-credit-card"></i> <span>車牌離場繳費</span>
+            </button>
+        </div>
+
+        <main class="flex-grow p-5 overflow-y-auto bg-slate-50">
+            
+            <div id="pageFind" class="space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-100 space-y-3">
+                    <div class="text-xs font-bold text-blue-600 uppercase flex items-center">
+                        <i class="fa-solid fa-magnifying-glass mr-1.5"></i> 1. 請輸入目的地尋找附近停車場
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <input id="destInput" type="text" placeholder="熱門測試：湖口車站、新竹巨城、台北101" class="flex-grow bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition-colors">
+                        <button onclick="searchParking()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 rounded-xl text-sm shadow-md transition-colors flex items-center space-x-1">
+                            <i class="fa-solid fa-search"></i> <span>搜尋</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="parkingResult" class="hidden space-y-4">
+                    <div class="relative rounded-2xl overflow-hidden h-64 border border-slate-200 shadow-inner">
+                        <iframe id="mapFrame" width="100%" height="100%" frameborder="0" style="border:0" src="about:blank" allowfullscreen></iframe>
+                    </div>
+
+                    <div class="text-xs font-bold text-slate-500 px-1 uppercase flex items-center">
+                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1.5"></i> AI 智慧推薦附近真實車位
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-100 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 id="parkName1" class="font-black text-slate-800 text-sm">--</h3>
+                                <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-route mr-1"></i> 距離目的地 150 公尺</p>
+                            </div>
+                            <span id="spotsA" class="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-full">尚有空位 --</span>
+                        </div>
+                        <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-2 text-center text-xs text-emerald-800 font-medium">
+                            <i class="fa-solid fa-brain text-emerald-600 mr-1"></i> AI 預測：抵達時空位機率 <span id="probA" class="font-bold text-sm text-emerald-600">--%</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1 border-t border-slate-100 text-xs">
+                            <span class="font-bold text-slate-600">$40 / 小時</span>
+                            <a id="navLink1" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm transition-colors flex items-center"><i class="fa-solid fa-location-arrow mr-1"></i> 開始導航</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-100 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 id="parkName2" class="font-black text-slate-800 text-sm">--</h3>
+                                <p class="text-xs text-slate-400 mt-0.5"><i class="fa-solid fa-route mr-1"></i> 距離目的地 320 公尺</p>
+                            </div>
+                            <span id="spotsB" class="bg-amber-100 text-amber-700 text-[10px] font-black px-2 py-0.5 rounded-full">尚有空位 --</span>
+                        </div>
+                        <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-2 text-center text-xs text-amber-800 font-medium">
+                            <i class="fa-solid fa-brain text-amber-600 mr-1"></i> AI 預測：抵達時空位機率 <span id="probB" class="font-bold text-sm text-amber-600">--%</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1 border-t border-slate-100 text-xs">
+                            <span class="font-bold text-slate-600">$30 / 小時</span>
+                            <a id="navLink2" href="#" target="_blank" class="bg-slate-600 hover:bg-slate-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-sm transition-colors flex items-center"><i class="fa-solid fa-location-arrow mr-1"></i> 開始導航</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pagePay" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-100 space-y-3">
+                    <div class="text-xs font-bold text-blue-600 uppercase flex items-center">
+                        <i class="fa-solid fa-id-card mr-1.5"></i> 1. 請輸入車牌號碼查詢
+                    </div>
+                    <div class="flex space-x-2">
+                        <input id="plateInput" type="text" placeholder="輸入車牌查詢" class="flex-grow bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 text-center text-xl font-black tracking-widest text-slate-800 uppercase focus:outline-none focus:border-blue-500 transition-colors">
+                        <button onclick="searchCar()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 rounded-xl text-sm shadow-md transition-colors">
+                            查詢
+                        </button>
+                    </div>
+                </div>
+
+                <div id="payResult" class="hidden space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm p-4 border border-slate-100 space-y-4">
+                        <div class="text-xs font-bold text-blue-600 uppercase flex items-center">
+                            <i class="fa-solid fa-circle-info mr-1.5"></i> 2. 停車與帳單明細
+                        </div>
+                        
+                        <div class="bg-blue-50/50 rounded-xl p-3 flex items-center space-x-3 border border-blue-100/50">
+                            <div class="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-slate-400">AI 智慧尋車位置</div>
+                                <div id="carLocation" class="text-base font-black text-slate-800"></div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-b border-dashed border-slate-200 py-3 space-y-2 text-xs text-slate-600 font-medium">
+                            <div class="flex justify-between"><span>當前場域：</span><span class="text-slate-800 font-bold">特約智慧停車場</span></div>
+                            <div class="flex justify-between"><span>入場時間：</span><span id="entryTime" class="text-slate-800"></span></div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-slate-700 font-bold text-sm">應繳總金額</span>
+                            <span class="text-2xl font-black text-rose-500">$<span id="totalFee"></span> <span class="text-xs text-slate-400 font-normal">元</span></span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        <button onclick="paySuccess('LINE Pay')" class="w-full bg-[#06C755] text-white font-bold py-3 rounded-xl flex items-center justify-center space-x-2 shadow-sm transition-transform active:scale-[0.99]">
+                            <i class="fa-brands fa-line text-lg"></i>
+                            <span>LINE Pay 快速付款</span>
+                        </button>
+                        <button onclick="paySuccess('Apple Pay')" class="w-full bg-black text-white font-bold py-3 rounded-xl flex items-center justify-center space-x-2 shadow-sm transition-transform active:scale-[0.99]">
+                            <i class="fa-brands fa-apple text-lg"></i>
+                            <span>Apple Pay 快速付款</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="bg-white border-t border-slate-100 py-3 text-center text-[11px] text-slate-400 font-medium rounded-b-[28px]">
+            © 2026 AI Parking Assistant Pro.
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const tabFind = document.getElementById('tabFind');
+            const tabPay = document.getElementById('tabPay');
+            const pageFind = document.getElementById('pageFind');
+            const pagePay = document.getElementById('pagePay');
+
+            if (tab === 'find') {
+                tabFind.className = "flex-1 py-3 text-blue-600 border-b-2 border-blue-600 transition-all flex items-center justify-center space-x-1";
+                tabPay.className = "flex-1 py-3 hover:text-slate-800 transition-all flex items-center justify-center space-x-1 text-slate-500";
+                pageFind.classList.remove('hidden');
+                pagePay.classList.add('hidden');
+            } else {
+                tabPay.className = "flex-1 py-3 text-blue-600 border-b-2 border-blue-600 transition-all flex items-center justify-center space-x-1";
+                tabFind.className = "flex-1 py-3 hover:text-slate-800 transition-all flex items-center justify-center space-x-1 text-slate-500";
+                pagePay.classList.remove('hidden');
+                pageFind.classList.add('hidden');
+            }
+        }
+
+        const realParkingDb = {
+            "湖口": ["湖口車站公有停車場", "湖口鄉民廣場地下停車場"],
+            "湖口車站": ["湖口車站公有停車場", "湖口成功停車場"],
+            "新竹巨城": ["遠東巨城購物中心停車場", "民權公有路外停車場"],
+            "巨城": ["遠東巨城購物中心停車場", "錦華街公有停車場"],
+            "新竹車站": ["新竹火車站後站停車場", "晶品城購物中心停車場"],
+            "台北101": ["TAIPEI 101 地下停車場", "信義廣場地下停車場"],
+            "信義區": ["府前廣場地下停車場", "信義微風地下停車場"],
+            "台北車站": ["台北車站地下停車場", "市民大道地下停車場 (中山-重慶段)"],
+            "西門町": ["峨眉立體停車場", "洛陽綜合立體停車場"],
+            "台中逢甲": ["逢甲福星停車場", "逢甲文華停車場"],
+            "高雄巨蛋": ["漢神巨蛋購物廣場停車場", "博愛明華公有停車場"]
+        };
+
+        const prefixOptions = ["特約智慧", "公有立體", "連鎖綠能", "智慧地下"];
+        const suffixOptions = ["第一停車場", "特約場", "二號站"];
+
+        function searchParking() {
+            const query = document.getElementById('destInput').value.trim();
+            if (query === "") {
+                alert("請輸入目的地名稱");
+                return;
+            }
+            
+            const mapFrame = document.getElementById('mapFrame');
+            mapFrame.src = `https://maps.google.com/maps?q=${encodeURIComponent(query + ' 停車場')}&t=&z=15&ie=UTF-8&iwloc=&output=embed`;
+            
+            let p1Name = "";
+            let p2Name = "";
+            let matchedKey = Object.keys(realParkingDb).find(key => query.includes(key) || key.includes(query));
+            
+            if (matchedKey) {
+                p1Name = realParkingDb[matchedKey][0];
+                p2Name = realParkingDb[matchedKey][1];
+            } else {
+                const p1 = prefixOptions[Math.floor(Math.random() * prefixOptions.length)];
+                const s1 = suffixOptions[Math.floor(Math.random() * suffixOptions.length)];
+                const p2 = prefixOptions[Math.floor(Math.random() * prefixOptions.length)];
+                const s2 = suffixOptions[Math.floor(Math.random() * suffixOptions.length)];
+                p1Name = `${query} ${p1}${s1}`;
+                p2Name = `${query} ${p2}二站`;
+            }
+
+            document.getElementById('parkName1').innerText = p1Name;
+            document.getElementById('parkName2').innerText = p2Name;
+            
+            const randomSpotsA = Math.floor(Math.random() * 31) + 5; 
+            const randomProbA = Math.floor(Math.random() * 24) + 75;
+            const randomSpotsB = Math.floor(Math.random() * 15) + 1;
+            const randomProbB = Math.floor(Math.random() * 31) + 40;
+
+            document.getElementById('spotsA').innerText = `尚有空位 ${randomSpotsA}`;
+            document.getElementById('probA').innerText = `${randomProbA}%`;
+            document.getElementById('spotsB').innerText = `尚有空位 ${randomSpotsB}`;
+            document.getElementById('probB').innerText = `${randomProbB}%`;
+            
+            document.getElementById('navLink1').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p1Name)}`;
+            document.getElementById('navLink2').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p2Name)}`;
+            
+            document.getElementById('parkingResult').classList.remove('hidden');
+        }
+
+        // 🎯 核心修正：隨機生成尋車位置陣列
+        const floors = ["B1F", "B2F", "B3F"];
+        const zones = [
+            { name: "藍區", colorClass: "text-blue-600" },
+            { name: "綠區", colorClass: "text-emerald-600" },
+            { name: "紅區", colorClass: "text-rose-600" },
+            { name: "橘區", colorClass: "text-amber-500" }
+        ];
+
+        function searchCar() {
+            const inputVal = document.getElementById("plateInput").value.trim();
+            const payResult = document.getElementById("payResult");
+
+            if (inputVal === "") {
+                alert("請輸入車牌號碼進行查詢！");
+                payResult.classList.add("hidden");
+                return;
+            }
+
+            // 隨機抽選樓層、區域與車位號碼 (001~120)
+            const randomFloor = floors[Math.floor(Math.random() * floors.length)];
+            const randomZone = zones[Math.floor(Math.random() * zones.length)];
+            const randomNo = String(Math.floor(Math.random() * 120) + 1).padStart(3, '0');
+
+            // 隨機生成停車時間與費用 (讓資料看起是活的)
+            const randomHours = (Math.random() * 4 + 0.5).toFixed(1); 
+            const randomFee = Math.ceil(randomHours) * 40; 
+            
+            // 渲染隨機位置
+            document.getElementById("carLocation").innerHTML = `${randomFloor} 樓層 ➔ <span class='${randomZone.colorClass} font-bold'>${randomZone.name} ${randomNo} 號</span>`;
+            document.getElementById("entryTime").innerText = `今日已停 ${randomHours} 小時`;
+            document.getElementById("totalFee").innerText = randomFee;
+            
+            payResult.classList.remove("hidden");
+        }
+
+        function paySuccess(method) {
+            alert(`使用 ${method} 繳費成功！請於 15 分鐘內離場。`);
+        }
+    </script>
+</body>
+</html>
